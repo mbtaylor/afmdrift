@@ -9,19 +9,21 @@ public class SynthFrame {
     private final double[] surface_;
     private final double[] drift_;
     private final double[] samples_;
+    private final double[] noise_;
 
     SynthFrame( Gridder gridder, Random random ) {
         gridder_ = gridder;
         random_ = random;
+        int ns = gridder_.sampleCount();
         surface_ = createSurface( gridder, random );
         drift_ = createDrift( gridder, random );
-        int ns = gridder_.sampleCount();
+        noise_ = createNoise( ns, random );
         samples_ = new double[ ns ];
         for ( int is = 0; is < ns; is++ ) {
             SamplePos spos = gridder_.samplePos( is );
             PixelPos ppos = new PixelPos( spos.ix_, spos.iy_ );
             int ip = gridder_.pixelIndex( ppos );
-            samples_[ is ] = drift_[ is ] + surface_[ ip ];
+            samples_[ is ] = drift_[ is ] + surface_[ ip ] + noise_[ ip ];
         }
     }
 
@@ -62,6 +64,14 @@ public class SynthFrame {
         addWave( drift, nsamp * 6, 4, random );
         addWave( drift, nsamp * 1.5, 0.8, random );
         return drift;
+    }
+
+    private static double[] createNoise( int ns, Random random ) {
+       double[] noise = new double[ ns ];
+       for ( int is = 0; is < ns; is++ ) {
+           noise[ is ] = random.nextGaussian() * 0.2;
+       }
+       return noise;
     }
 
     private static void addWave( double data[], double lambda,

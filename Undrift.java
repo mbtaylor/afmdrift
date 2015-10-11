@@ -20,5 +20,6 @@ public class Undrift {
     }
 
     private Fit createFit( double[] tracePair ) {
+ return null;
     }
 }
