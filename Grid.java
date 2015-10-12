@@ -66,4 +66,13 @@ public class Grid {
         return ix >= 0 && ix < nx_
             && iy >= 0 && iy < ny_;
     }
+
+    public static void main( String[] args ) {
+        int nx = Integer.parseInt( args[ 0 ] );
+        int ny = Integer.parseInt( args[ 1 ] );
+        Grid g = new Grid( nx, ny );
+        for ( int is = 0; is < g.sampleCount(); is++ ) {
+            System.out.println( is + "\t" + g.samplePos( is ) );
+        }
+    }
 }
