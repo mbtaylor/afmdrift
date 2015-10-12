@@ -1,19 +1,19 @@
 
 public class Undrift {
 
-    private final Gridder gridder_;
+    private final Grid grid_;
     private final double[] samples_;
     private final Fit[] yfits_;
 
-    public Undrift( Gridder gridder, double[] samples ) {
-        gridder_ = gridder;
+    public Undrift( Grid grid, double[] samples ) {
+        grid_ = grid;
         samples_ = samples;
 
-        int ny2 = gridder_.ny() * 2;
-        int nx2 = gridder_.nx() * 2;
+        int ny2 = grid_.ny() * 2;
+        int nx2 = grid_.nx() * 2;
         yfits_ = new Fit[ ny2 ];
         double[] tracePair = new double[ nx2 ];
-        for ( int jy = 0; jy < gridder_.ny() * 2; jy++ ) {
+        for ( int jy = 0; jy < grid_.ny() * 2; jy++ ) {
             System.arraycopy( samples, jy * nx2, tracePair, 0, nx2 );
             yfits_[ jy ] = createFit( tracePair );
         }

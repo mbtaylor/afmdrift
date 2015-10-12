@@ -1,7 +1,7 @@
 
 JSRC = *.java
 
-jar: drift.jar
+build: drift.jar
 
 drift.jar: $(JSRC)
 	rm -rf tmp

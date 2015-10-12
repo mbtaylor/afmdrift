@@ -1,10 +1,10 @@
 
-public class Gridder {
+public class Grid {
 
     private final int nx_;
     private final int ny_;
 
-    public Gridder( int nx, int ny ) {
+    public Grid( int nx, int ny ) {
         nx_ = nx;
         ny_ = ny;
     }
