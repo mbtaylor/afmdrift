@@ -39,8 +39,8 @@ public class Gridder {
         switch ( spos.phase_ ) {
             case 0: return iy * 2 * nx_ + ix;
             case 1: return ( iy + 1 ) * 2 * nx_ - ix - 1;
-            case 2: return ( ny_ * nx_ * 4 ) - ( iy * 2 * nx_ ) + ix;
-            case 3: return ( ny_ * nx_ * 4 ) - ( ( iy + 1 ) * 2 * nx_ ) - ix -1;
+            case 2: return ( ny_ * nx_ * 4 ) - ( ( iy + 1 ) * 2 * nx_ ) + ix;
+            case 3: return ( ny_ * nx_ * 4 ) - ( ( iy ) * 2 * nx_ ) - ix - 1;
             default: return -1;
         }
     }
