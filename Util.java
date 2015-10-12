@@ -10,21 +10,6 @@ public class Util {
     private Util() {
     }
 
-    public static Frame createFrame( final String name, final Grid grid,
-                                     final double[] samples ) {
-        return new Frame() {
-            public String getName() {
-                return name;
-            }
-            public Grid getGrid() {
-                return grid;
-            }
-            public double[] getSamples() {
-                return samples;
-            }
-        };
-    }
-
     public static void writeFrames( Frame[] frames ) throws IOException {
         String pixName = "pixels.csv";
         String sampName = "samples.csv";
@@ -62,7 +47,7 @@ public class Util {
                 .append( spos.phase );
             for ( Frame frm : frames ) {
                 sbuf.append( "," )
-                    .append( frm.getSamples()[ is ] );
+                    .append( frm.getSample( is ) );
             }
             pout.println( sbuf.toString() );
         }
@@ -95,11 +80,10 @@ public class Util {
                 .append( "," )
                 .append( iy );
             for ( Frame frm : frames ) {
-                double[] samples = frm.getSamples();
                 for ( short iq = 0; iq < 4; iq++ ) {
                     int is = grid.sampleIndex( new SamplePos( ix, iy, iq ) );
                     sbuf.append( "," )
-                        .append( samples[ is ] );
+                        .append( frm.getSample( is ) );
                 }
             }
             pout.println( sbuf.toString() );

@@ -2,43 +2,30 @@
 import java.io.IOException;
 import java.util.Random;
 
-public class SynthFrame implements Frame {
+public class SynthFrame extends Frame {
 
-    private final String name_;
-    private final Grid grid_;
-    private final Random random_;
     private final double[] surface_;
     private final double[] drift_;
     private final double[] samples_;
     private final double[] noise_;
 
     SynthFrame( String name, Grid grid, Random random ) {
-        name_ = name;
-        grid_ = grid;
-        random_ = random;
-        int ns = grid_.sampleCount();
+        super( name, grid );
+        int ns = grid.sampleCount();
         surface_ = createSurface( grid, random );
         drift_ = createDrift( grid, random );
         noise_ = createNoise( ns, random );
         samples_ = new double[ ns ];
         for ( int is = 0; is < ns; is++ ) {
-            SamplePos spos = grid_.samplePos( is );
+            SamplePos spos = grid.samplePos( is );
             PixelPos ppos = new PixelPos( spos.ix, spos.iy );
-            int ip = grid_.pixelIndex( ppos );
+            int ip = grid.pixelIndex( ppos );
             samples_[ is ] = surface_[ ip ] + drift_[ is ] + noise_[ is ];
         }
     }
 
-    public String getName() {
-        return name_;
-    }
-
-    public Grid getGrid() {
-        return grid_;
-    }
-
-    public double[] getSamples() {
-        return samples_;
+    public double getSample( int is ) {
+        return samples_[ is ];
     }
 
     private static double[] createSurface( Grid grid, Random random ) {

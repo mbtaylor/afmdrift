@@ -10,7 +10,6 @@ public class Drifter {
 
     public Drifter( Frame frm ) {
         grid_ = frm.getGrid();
-        double[] samples = frm.getSamples();
 
         int nx = grid_.nx();
         int ny = grid_.ny();
@@ -22,7 +21,8 @@ public class Drifter {
             for ( int ix = 0; ix < nx; ix++ ) {
                 int kx0 = jy * nx2 + nx + ix;
                 int kx1 = jy * nx2 + nx - 1 - ix;
-                xdeltas[ ix ] = 0.5 * ( samples[ kx0 ] - samples[ kx1 ] );
+                xdeltas[ ix ] = 0.5 * ( frm.getSample( kx0 )
+                                      - frm.getSample( kx1 ) );
             }
             xfits[ jy ] = createLinearFit( xdeltas );
         }
@@ -72,7 +72,11 @@ public class Drifter {
     //  Fit deltaFit = createLinearFit( ydeltas );
 
     public Frame getDrift() {
-        return Util.createFrame( "drift", grid_, drift_ );
+        return new Frame( "drift", grid_ ) {
+            public double getSample( int is ) {
+                return drift_[ is ];
+            }
+        };
     }
 
     private Fit createLinearFit( double[] data ) {
@@ -93,10 +97,14 @@ public class Drifter {
 
     public static void main( String[] args ) throws IOException {
         Grid grid = new Grid( 100, 100 );
-        Frame in = new SynthFrame( "z", grid, new Random( 234555L ) );
+        final Frame in = new SynthFrame( "z", grid, new Random( 234555L ) );
         Drifter drifter = new Drifter( in );
-        Frame drift = drifter.getDrift();
-        Frame sum = new SumFrame( "out", new Frame[] { in, drift } );
+        final Frame drift = drifter.getDrift();
+        Frame sum = new Frame( "out", grid ) {
+            public double getSample( int is ) {
+                return in.getSample( is ) + drift.getSample( is );
+            }
+        };
         Util.writeFrames( new Frame[] { in, drift, sum } );
     }
 }
