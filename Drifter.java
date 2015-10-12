@@ -1,4 +1,5 @@
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
 
@@ -38,7 +39,7 @@ public class Drifter {
     }
 
     public Frame getDrift() {
-        return Util.createFrame( grid_, drift_ );
+        return Util.createFrame( "drift", grid_, drift_ );
     }
 
     private Fit createLinearFit( double[] data ) {
@@ -57,21 +58,10 @@ public class Drifter {
         };
     }
 
-    public static void main( String[] args ) {
+    public static void main( String[] args ) throws IOException {
         Grid grid = new Grid( 100, 100 );
-        Frame in = new SynthFrame( grid, new Random( 234555L ) );
+        Frame in = new SynthFrame( "z", grid, new Random( 234555L ) );
         Frame drift = new Drifter( in ).getDrift();
-        PrintStream out = System.out;
-        out.println( "t,ix,iy,phase,z,drift" );
-        int ns = grid.sampleCount();
-        for ( int is = 0; is < ns; is++ ) {
-            SamplePos spos = grid.samplePos( is );
-            out.println( is + ","
-                       + spos.ix + ","
-                       + spos.iy + ","
-                       + spos.phase + ","
-                       + in.getSamples()[ is ] + ","
-                       + drift.getSamples()[ is ] );
-        }
+        Util.writeFrames( new Frame[] { in, drift } );
     }
 }

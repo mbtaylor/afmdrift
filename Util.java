@@ -10,8 +10,12 @@ public class Util {
     private Util() {
     }
 
-    public static Frame createFrame( final Grid grid, final double[] samples ) {
+    public static Frame createFrame( final String name, final Grid grid,
+                                     final double[] samples ) {
         return new Frame() {
+            public String getName() {
+                return name;
+            }
             public Grid getGrid() {
                 return grid;
             }
@@ -21,59 +25,84 @@ public class Util {
         };
     }
 
-    public static void writeFrame( Frame frame ) throws IOException {
+    public static void writeFrames( Frame[] frames ) throws IOException {
         String pixName = "pixels.csv";
         String sampName = "samples.csv";
-        Grid g = frame.getGrid();
+        Grid g = frames[ 0 ].getGrid();
         System.err.println( pixName + ": " + g.pixelCount() + " rows" );
         OutputStream pixOut = new FileOutputStream( pixName );
-        writePixels( frame, pixOut );
+        writePixels( frames, pixOut );
         pixOut.close();
         System.err.println( sampName + ": " + g.sampleCount() + " rows" );
         OutputStream sampOut = new FileOutputStream( sampName );
-        writeSamples( frame, sampOut );
+        writeSamples( frames, sampOut );
         sampOut.close();
     }
 
-    public static void writeSamples( Frame frame, OutputStream out )
+    public static void writeSamples( Frame[] frames, OutputStream out )
             throws IOException {
-        Grid grid = frame.getGrid();
-        double[] samples = frame.getSamples();
+        Grid grid = frames[ 0 ].getGrid();
         PrintStream pout = new PrintStream( new BufferedOutputStream( out ) );
-        pout.println( "t,ix,iy,phase,z" );
-        int ns = samples.length;
+        StringBuffer hdr = new StringBuffer( "t,ix,iy,phase" );
+        for ( Frame frm : frames ) {
+            hdr.append( "," )
+               .append( frm.getName() );
+        }
+        pout.println( hdr.toString() );
+        int ns = grid.sampleCount();
         for ( int is = 0; is < ns; is++ ) {
             SamplePos spos = grid.samplePos( is );
-            pout.println( is + ","
-                        + spos.ix + ","
-                        + spos.iy + ","
-                        + spos.phase + "," 
-                        + samples[ is ] );
+            StringBuffer sbuf = new StringBuffer();
+            sbuf.append( is )
+                .append( "," )
+                .append( spos.ix )
+                .append( "," )
+                .append( spos.iy )
+                .append( "," )
+                .append( spos.phase );
+            for ( Frame frm : frames ) {
+                sbuf.append( "," )
+                    .append( frm.getSamples()[ is ] );
+            }
+            pout.println( sbuf.toString() );
         }
         pout.flush();
     }
 
-    public static void writePixels( Frame frame, OutputStream out )
+    public static void writePixels( Frame[] frames, OutputStream out )
             throws IOException {
-        Grid grid = frame.getGrid();
-        double[] samples = frame.getSamples();
+        Grid grid = frames[ 0 ].getGrid();
         PrintStream pout = new PrintStream( new BufferedOutputStream( out ) );
+        StringBuffer hdr = new StringBuffer( "ip,ix,iy" );
+        for ( Frame frm : frames ) {
+            for ( int iq = 0; iq < 4; iq++ ) {
+                hdr.append( "," )
+                   .append( frm.getName() )
+                   .append( iq );
+            }
+        }
+        pout.println( hdr.toString() );
         int np = grid.pixelCount();
         double[] sqs = new double[ 4 ];
-        pout.println( "t,ix,iy,s0,s1,s2,s3" );
         for ( int ip = 0; ip < np; ip++ ) {
             PixelPos ppos = grid.pixelPos( ip );
-            for ( short iq = 0; iq < 4; iq++ ) {
-                SamplePos spos = new SamplePos( ppos.ix, ppos.iy, iq );
-                sqs[ iq ] = samples[ grid.sampleIndex( spos ) ];
+            int ix = ppos.ix;
+            int iy = ppos.iy;
+            StringBuffer sbuf = new StringBuffer();
+            sbuf.append( ip )
+                .append( "," )
+                .append( ix )
+                .append( "," )
+                .append( iy );
+            for ( Frame frm : frames ) {
+                double[] samples = frm.getSamples();
+                for ( short iq = 0; iq < 4; iq++ ) {
+                    int is = grid.sampleIndex( new SamplePos( ix, iy, iq ) );
+                    sbuf.append( "," )
+                        .append( samples[ is ] );
+                }
             }
-            pout.println( ip + ","
-                        + ppos.ix + ","
-                        + ppos.iy + ","
-                        + sqs[ 0 ] + ","
-                        + sqs[ 1 ] + ","
-                        + sqs[ 2 ] + ","
-                        + sqs[ 3 ] );
+            pout.println( sbuf.toString() );
         }
         pout.flush();
     }

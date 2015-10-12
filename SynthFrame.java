@@ -4,6 +4,7 @@ import java.util.Random;
 
 public class SynthFrame implements Frame {
 
+    private final String name_;
     private final Grid grid_;
     private final Random random_;
     private final double[] surface_;
@@ -11,7 +12,8 @@ public class SynthFrame implements Frame {
     private final double[] samples_;
     private final double[] noise_;
 
-    SynthFrame( Grid grid, Random random ) {
+    SynthFrame( String name, Grid grid, Random random ) {
+        name_ = name;
         grid_ = grid;
         random_ = random;
         int ns = grid_.sampleCount();
@@ -25,6 +27,10 @@ public class SynthFrame implements Frame {
             int ip = grid_.pixelIndex( ppos );
             samples_[ is ] = surface_[ ip ] + drift_[ is ] + noise_[ is ];
         }
+    }
+
+    public String getName() {
+        return name_;
     }
 
     public Grid getGrid() {
@@ -88,8 +94,8 @@ public class SynthFrame implements Frame {
     }
 
     public static void main( String[] args ) throws IOException {
-        SynthFrame frm = new SynthFrame( new Grid( 100, 100 ),
+        SynthFrame frm = new SynthFrame( "z", new Grid( 100, 100 ),
                                          new Random( 234555L ) );
-        Util.writeFrame( frm );
+        Util.writeFrames( new Frame[] { frm } );
     }
 }
