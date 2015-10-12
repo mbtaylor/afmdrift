@@ -18,8 +18,8 @@ public class GridTest {
         assertEquals( ns, nx * ny * 4 );
         for ( int is = 0; is < ns; is++ ) {
             SamplePos spos = g.samplePos( is );
-            phaseCounts[ spos.phase_ ]++;
-            PixelPos ppos = new PixelPos( spos.ix_, spos.iy_ );
+            phaseCounts[ spos.phase ]++;
+            PixelPos ppos = new PixelPos( spos.ix, spos.iy );
             pixCounts[ g.pixelIndex( ppos ) ]++;
             assertEquals( is, g.sampleIndex( spos ) );
         }

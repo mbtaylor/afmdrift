@@ -26,17 +26,17 @@ public class Grid {
     }
 
     public int pixelIndex( PixelPos ppos ) {
-        int ix = ppos.ix_;
-        int iy = ppos.iy_;
+        int ix = ppos.ix;
+        int iy = ppos.iy;
         return inRange( ix, iy )
              ? ix + nx_ * iy 
              : -1;
     }
 
     public int sampleIndex( SamplePos spos ) {
-        int ix = spos.ix_;
-        int iy = spos.iy_;
-        switch ( spos.phase_ ) {
+        int ix = spos.ix;
+        int iy = spos.iy;
+        switch ( spos.phase ) {
             case 0: return iy * 2 * nx_ + ix;
             case 1: return ( iy + 1 ) * 2 * nx_ - ix - 1;
             case 2: return ( ny_ * nx_ * 4 ) - ( ( iy + 1 ) * 2 * nx_ ) + ix;

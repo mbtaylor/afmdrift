@@ -1,14 +1,14 @@
 
 public class PixelPos {
-    public int ix_;
-    public int iy_;
+    public int ix;
+    public int iy;
     public PixelPos( int ix, int iy ) {
-        ix_ = ix;
-        iy_ = iy;
+        this.ix = ix;
+        this.iy = iy;
     }
 
     @Override
     public String toString() {
-        return "(" + ix_ + ", " + iy_ + ")";
+        return "(" + ix + ", " + iy + ")";
     }
 }

@@ -21,7 +21,7 @@ public class SynthFrame {
         samples_ = new double[ ns ];
         for ( int is = 0; is < ns; is++ ) {
             SamplePos spos = grid_.samplePos( is );
-            PixelPos ppos = new PixelPos( spos.ix_, spos.iy_ );
+            PixelPos ppos = new PixelPos( spos.ix, spos.iy );
             int ip = grid_.pixelIndex( ppos );
             samples_[ is ] = drift_[ is ] + surface_[ ip ] + noise_[ ip ];
         }
@@ -92,9 +92,9 @@ public class SynthFrame {
         for ( int is = 0; is < samples.length; is++ ) {
             SamplePos spos = grid.samplePos( is );
             out.println( is + ","
-                       + spos.ix_ + ","
-                       + spos.iy_ + ","
-                       + spos.phase_ + "," 
+                       + spos.ix + ","
+                       + spos.iy + ","
+                       + spos.phase + "," 
                        + samples[ is ] );
         }
     }
