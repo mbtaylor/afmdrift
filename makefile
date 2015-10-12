@@ -16,18 +16,17 @@ clean:
 data: samples.csv pixels.csv
 
 samples.csv pixels.csv: drift.jar
-	java -classpath drift.jar Drifter
-
-drift.csv: drift.jar
-	java -classpath drift.jar Drifter >$@
+	java -ea -classpath drift.jar Drifter
 
 display: samples.csv
 	 stilts plot2plane xpix=1000 ypix=300 navaxes=x \
-                           auxmap=sron \
+                           auxmap=sron auxvisible=false \
+                           legend=false grid=true \
                            in=samples.csv ifmt=csv x=t \
                            layer1=mark y1=z shading1=aux aux1=phase \
                            layer2=line y2=drift color2=black \
+                           layer3=line y3=out color3=green
 
 test: drift.jar
-	java -classpath drift.jar GridTest
+	java -ea -classpath drift.jar GridTest
 
