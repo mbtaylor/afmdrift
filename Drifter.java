@@ -11,6 +11,10 @@ public class Drifter {
     public Drifter( Frame frm ) {
         grid_ = frm.getGrid();
 
+        // Fit each trace/retrace section to a straight line.
+        // It's assumed small enough in time that it's a good approximation.
+        // Since the trace/retrace are of the same surface, we can
+        // cancel out the real signal, and leave just noise+drift.
         int nx = grid_.nx();
         int ny = grid_.ny();
         int ny2 = grid_.ny() * 2;
@@ -24,9 +28,13 @@ public class Drifter {
                 xdeltas[ ix ] = 0.5 * ( frm.getSample( kx0 )
                                       - frm.getSample( kx1 ) );
             }
+
+            // Cubic fit might be better here.
             xfits[ jy ] = createLinearFit( xdeltas );
         }
 
+        // Calculate linear sections per grid point.
+        // This is missing an unknown offset for each (trace/retrace) section.
         int ns = grid_.sampleCount();
         double[] adrift = new double[ ns ];
         for ( int is = 0; is < ns; is++ ) {
@@ -35,12 +43,16 @@ public class Drifter {
             adrift[ is ] = xfits[ jy ].f( jx - nx );
         }
 
+        // Calculate the offsets by dead reckoning - just look
+        // at the start and finish to work out the offset for the next one.
+        // This risks getting lost the more sections it's done for.
         double[] yoffs = new double[ ny2 ];
         for ( int jy = 1; jy < ny2; jy++ ) {
             Fit fit = xfits[ jy ];
             yoffs[ jy ] = yoffs[ jy - 1 ] + fit.f( nx ) - fit.f( -nx );
         }
 
+        // Combine the offsets with the line sections to get the drift.
         drift_ = new double[ ns ];
         for ( int is = 0; is < ns; is++ ) {
             int jy = is / nx2;
@@ -48,6 +60,12 @@ public class Drifter {
         }
     }
 
+    // You can work out the the offset residuals and try to use that to
+    // correct dead reckoning errors if there is a retrace in Y as well as X.
+    // However, fitting is a bit complicated, since you have the difference
+    // of two functions as a function of delta t, rather than the value
+    // of the function itself.  It is possible to work back from there to
+    // fit a known/assumed functional form, but may be difficult analytically.
     //  double[] ydeltas = new double[ ny2 ];
     //  for ( int iy = 0; iy < ny; iy++ ) {
     //      int ky0 = iy;
