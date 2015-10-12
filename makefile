@@ -11,16 +11,21 @@ drift.jar: $(JSRC)
 	rm -rf tmp
 
 clean:
-	rm -rf drift.jar tmp/ s.csv
+	rm -rf drift.jar tmp/ samples.csv pixels.csv
 
-s.csv: drift.jar
-	java -classpath drift.jar SynthFrame > s.csv
+data: samples.csv pixels.csv drift.csv
 
-display: s.csv
+samples.csv pixels.csv: drift.jar
+	java -classpath drift.jar SynthFrame
+
+drift.csv: drift.jar
+	java -classpath drift.jar Drifter >$@
+
+display: samples.csv
 	 stilts plot2plane xpix=1000 ypix=300 navaxes=x \
                            auxmap=sron \
                            layer1=mark shading1=aux \
-                           in1=s.csv ifmt1=csv x1=index y1=z aux1=phase
+                           in1=samples.csv ifmt1=csv x1=index y1=z aux1=phase
 
 test: drift.jar
 	java -classpath drift.jar GridTest

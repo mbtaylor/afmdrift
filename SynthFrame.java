@@ -1,8 +1,8 @@
 
-import java.io.PrintStream;
+import java.io.IOException;
 import java.util.Random;
 
-public class SynthFrame {
+public class SynthFrame implements Frame {
 
     private final Grid grid_;
     private final Random random_;
@@ -23,8 +23,12 @@ public class SynthFrame {
             SamplePos spos = grid_.samplePos( is );
             PixelPos ppos = new PixelPos( spos.ix, spos.iy );
             int ip = grid_.pixelIndex( ppos );
-            samples_[ is ] = drift_[ is ] + surface_[ ip ] + noise_[ ip ];
+            samples_[ is ] = surface_[ ip ] + drift_[ is ] + noise_[ is ];
         }
+    }
+
+    public Grid getGrid() {
+        return grid_;
     }
 
     public double[] getSamples() {
@@ -83,19 +87,9 @@ public class SynthFrame {
         }
     }
 
-    public static void main( String[] args ) {
-        Grid grid = new Grid( 100, 100 );
-        SynthFrame frm = new SynthFrame( grid, new Random( 234555L ) );
-        double[] samples = frm.getSamples();
-        PrintStream out = System.out;
-        out.println( "t,ix,iy,phase,z" );
-        for ( int is = 0; is < samples.length; is++ ) {
-            SamplePos spos = grid.samplePos( is );
-            out.println( is + ","
-                       + spos.ix + ","
-                       + spos.iy + ","
-                       + spos.phase + "," 
-                       + samples[ is ] );
-        }
+    public static void main( String[] args ) throws IOException {
+        SynthFrame frm = new SynthFrame( new Grid( 100, 100 ),
+                                         new Random( 234555L ) );
+        Util.writeFrame( frm );
     }
 }
