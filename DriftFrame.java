@@ -3,30 +3,30 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
 
-public class Drifter {
+public class DriftFrame extends Frame {
 
-    private final Grid grid_;
     private final double[] drift_;
 
-    public Drifter( Frame frm ) {
-        grid_ = frm.getGrid();
+    public DriftFrame( Frame in ) {
+        super( "drift", in.getGrid() );
+        Grid grid = getGrid();
 
         // Fit each trace/retrace section to a straight line.
         // It's assumed small enough in time that it's a good approximation.
         // Since the trace/retrace are of the same surface, we can
         // cancel out the real signal, and leave just noise+drift.
-        int nx = grid_.nx();
-        int ny = grid_.ny();
-        int ny2 = grid_.ny() * 2;
-        int nx2 = grid_.nx() * 2;
+        int nx = grid.nx();
+        int ny = grid.ny();
+        int ny2 = grid.ny() * 2;
+        int nx2 = grid.nx() * 2;
         Fit[] xfits = new Fit[ ny2 ];
         for ( int jy = 0; jy < ny2; jy++ ) {
             double[] xdeltas = new double[ nx ];
             for ( int ix = 0; ix < nx; ix++ ) {
                 int ks0 = jy * nx2 + nx + ix;
                 int ks1 = jy * nx2 + nx - 1 - ix;
-                xdeltas[ ix ] = 0.5 * ( frm.getSample( ks0 )
-                                      - frm.getSample( ks1 ) );
+                xdeltas[ ix ] = 0.5 * ( in.getSample( ks0 )
+                                      - in.getSample( ks1 ) );
             }
 
             // Cubic fit might be better here.
@@ -35,7 +35,7 @@ public class Drifter {
 
         // Calculate linear sections per grid point.
         // This is missing an unknown offset for each (trace/retrace) section.
-        int ns = grid_.sampleCount();
+        int ns = grid.sampleCount();
         double[] xdrift = new double[ ns ];
         for ( int is = 0; is < ns; is++ ) {
             int jy = is / nx2;
@@ -64,13 +64,13 @@ public class Drifter {
                 for ( int jx = 0; jx < nx2; jx++ ) {
                     int is0 = ky0 * nx2 + jx;
                     int is1 = ky1 * nx2 + jx;
-                    SamplePos sp0 = grid_.samplePos( is0 );
-                    SamplePos sp1 = grid_.samplePos( is1 );
+                    SamplePos sp0 = grid.samplePos( is0 );
+                    SamplePos sp1 = grid.samplePos( is1 );
                     assert sp0.ix == sp1.ix;
                     assert sp0.iy == sp1.iy;
                     assert sp1.phase - sp0.phase == 2;
-                    double delta = ( frm.getSample( is1 ) - xdrift[ is1 ] )
-                                 - ( frm.getSample( is0 ) - xdrift[ is0 ] );
+                    double delta = ( in.getSample( is1 ) - xdrift[ is1 ] )
+                                 - ( in.getSample( is0 ) - xdrift[ is0 ] );
                     s += delta;
                 }
                 double meanDelta = s / nx2;
@@ -106,12 +106,8 @@ public class Drifter {
         }
     }
 
-    public Frame getDrift() {
-        return new Frame( "drift", grid_ ) {
-            public double getSample( int is ) {
-                return drift_[ is ];
-            }
-        };
+    public double getSample( int is ) {
+        return drift_[ is ];
     }
 
     /**
@@ -150,8 +146,7 @@ public class Drifter {
     public static void main( String[] args ) throws IOException {
         Grid grid = new Grid( 100, 100 );
         final Frame in = new SynthFrame( "z", grid, new Random( 234555L ) );
-        Drifter drifter = new Drifter( in );
-        final Frame drift = drifter.getDrift();
+        final DriftFrame drift = new DriftFrame( in );
         Frame sum = new Frame( "out", grid ) {
             public double getSample( int is ) {
                 return in.getSample( is ) - drift.getSample( is );

@@ -16,7 +16,7 @@ clean:
 data: samples.csv pixels.csv
 
 samples.csv pixels.csv: drift.jar
-	java -ea -classpath drift.jar Drifter
+	java -ea -classpath drift.jar DriftFrame
 
 display: samples.csv
 	 stilts plot2plane xpix=1000 ypix=300 navaxes=x \
