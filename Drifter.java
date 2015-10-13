@@ -56,7 +56,7 @@ public class Drifter {
         drift_ = new double[ ns ];
         for ( int is = 0; is < ns; is++ ) {
             int jy = is / nx2;
-            drift_[ is ] = - adrift[ is ] - yoffs[ jy ];
+            drift_[ is ] = adrift[ is ] + yoffs[ jy ];
         }
     }
 
@@ -120,7 +120,7 @@ public class Drifter {
         final Frame drift = drifter.getDrift();
         Frame sum = new Frame( "out", grid ) {
             public double getSample( int is ) {
-                return in.getSample( is ) + drift.getSample( is );
+                return in.getSample( is ) - drift.getSample( is );
             }
         };
         Util.writeFrames( new Frame[] { in, drift, sum } );
