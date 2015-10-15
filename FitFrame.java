@@ -3,12 +3,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
 
-public class DriftFrame extends Frame {
+public class FitFrame extends Frame {
 
     private final double[] drift_;
 
-    public DriftFrame( Frame in ) {
-        super( "drift", in.getGrid() );
+    public FitFrame( Frame in ) {
+        super( "fit", in.getGrid() );
         Grid grid = getGrid();
 
         // Fit each trace/retrace section to a straight line.
@@ -145,13 +145,34 @@ public class DriftFrame extends Frame {
 
     public static void main( String[] args ) throws IOException {
         Grid grid = new Grid( 100, 100 );
-        final Frame in = new SynthFrame( "z", grid, new Random( 234555L ) );
-        final DriftFrame drift = new DriftFrame( in );
-        Frame sum = new Frame( "out", grid ) {
+        final SynthFrame synth =
+            new SynthFrame( "z", grid, new Random( 234555L ) );
+        final Frame surface = synth.getSurface();
+        final Frame inDrift = synth.getDrift();
+        final FitFrame outDrift = new FitFrame( synth );
+        final Frame out = new Frame( "out", grid ) {
             public double getSample( int is ) {
-                return in.getSample( is ) - drift.getSample( is );
+                return synth.getSample( is ) - outDrift.getSample( is );
             }
         };
-        Util.writeFrames( new Frame[] { in, drift, sum } );
+        Frame zdiff = new Frame( "zdiff", grid ) {
+            public double getSample( int is ) {
+                return out.getSample( is ) - surface.getSample( is );
+            }
+        };
+        Frame driftDiff = new Frame ( "drdiff", grid ) {
+            public double getSample( int is ) {
+                return inDrift.getSample( is ) - outDrift.getSample( is );
+            }
+        };
+        Util.writeFrames( new Frame[] {
+            synth,
+            surface,
+            inDrift,
+            outDrift,
+            out,
+            zdiff,
+            driftDiff,
+        } );
     }
 }

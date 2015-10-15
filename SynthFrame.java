@@ -6,21 +6,25 @@ public class SynthFrame extends Frame {
 
     private final double[] surface_;
     private final double[] drift_;
-    private final double[] samples_;
     private final double[] noise_;
+    private final double[] samples_;
 
     SynthFrame( String name, Grid grid, Random random ) {
         super( name, grid );
+        
         int ns = grid.sampleCount();
-        surface_ = createSurface( grid, random );
+        double[] features = createFeatures( grid, random );
+        double[] slope = createSlope( grid );
         drift_ = createDrift( grid, random );
         noise_ = createNoise( ns, random );
+        surface_ = new double[ ns ];
         samples_ = new double[ ns ];
         for ( int is = 0; is < ns; is++ ) {
             SamplePos spos = grid.samplePos( is );
             PixelPos ppos = new PixelPos( spos.ix, spos.iy );
             int ip = grid.pixelIndex( ppos );
-            samples_[ is ] = surface_[ ip ] + drift_[ is ] + noise_[ is ];
+            surface_[ is ] = features[ ip ] + slope[ ip ];
+            samples_[ is ] = surface_[ is ] + drift_[ is ] + noise_[ is ];
         }
     }
 
@@ -28,7 +32,31 @@ public class SynthFrame extends Frame {
         return samples_[ is ];
     }
 
-    private static double[] createSurface( Grid grid, Random random ) {
+    public Frame getSurface() {
+        return new Frame( "surface", getGrid() ) {
+            public double getSample( int is ) {
+                return surface_[ is ];
+            }
+        };
+    }
+
+    public Frame getDrift() {
+        return new Frame( "drift", getGrid() ) {
+            public double getSample( int is ) {
+                return drift_[ is ];
+            }
+        };
+    }
+
+    public Frame getNoise() {
+        return new Frame( "noise", getGrid() ) {
+            public double getSample( int is ) {
+                return noise_[ is ];
+            }
+        };
+    }
+
+    private static double[] createFeatures( Grid grid, Random random ) {
         int n = grid.pixelCount();
         int nx = grid.nx();
         int ny = grid.ny();
@@ -49,6 +77,20 @@ public class SynthFrame extends Frame {
             }
         }
         return surf;
+    }
+
+    private static double[] createSlope( Grid grid ) {
+        double slopeAmp = 2;
+        int ns = grid.sampleCount();
+        int ny = grid.ny();
+        double[] slope = new double[ ns ];
+        for ( int is = 0; is < ns; is++ ) {
+            SamplePos spos = grid.samplePos( is );
+            int ix = spos.ix;
+            int iy = spos.iy;
+            slope[ is ] = slopeAmp * iy / ny;
+        }
+        return slope;
     }
 
     private static double[] createDrift( Grid grid, Random random ) {
