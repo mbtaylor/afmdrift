@@ -1,3 +1,4 @@
+.SUFFIXES: .csv .fits
 
 JSRC = *.java
 
@@ -11,22 +12,28 @@ drift.jar: $(JSRC)
 	rm -rf tmp
 
 clean:
-	rm -rf drift.jar tmp/ samples.csv pixels.csv
+	rm -rf drift.jar tmp/ samples.{csv,fits} pixels.{csv,fits}
 
 data: samples.csv pixels.csv
 
 samples.csv pixels.csv: drift.jar
 	java -ea -classpath drift.jar FitFrame
 
-display: samples.csv
-	 stilts plot2plane xpix=1000 ypix=300 navaxes=x \
-                           auxmap=rainbow auxvisible=false \
-                           legend=false grid=true \
-                           in=samples.csv ifmt=csv x=t \
-                           layer0=mark y0=surface size0=1 color0=grey \
-                           layer1=mark y1=z shading1=aux aux1=phase \
-                           layer2=line y2=drift color2=black \
-                           layer3=line y3=out color3=green \
+.csv.fits:
+	stilts tpipe in=$< ifmt=csv out=$@ ofmt=fits
+
+display: samples.fits
+	 stilts plot2plane \
+             xpix=1000 ypix=300 navaxes=x \
+             auxmap=paired auxvisible=false \
+             legend=true grid=true legpos=0.99,0.95 \
+             in=samples.fits x=t shading=flat \
+             layer1=mark y1=z shape1=cross shading1=aux aux1=phase \
+                         leglabel1=measured \
+             layer3=line y3=out color3=green leglabel3=corrected \
+             layer2=line y2=drift color2=red leglabel2='fitted drift' \
+             layer0=mark y0=surface size0=1 color0=grey \
+                         leglabel0='true surface'\
 
 test: drift.jar
 	java -ea -classpath drift.jar GridTest
